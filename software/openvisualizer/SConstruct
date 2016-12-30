@@ -145,6 +145,12 @@ AddOption('--pathTopo',
     action    = 'store')
 runnerEnv['PATHTOPO'] = GetOption('pathTopo')
 
+AddOption('--markov',
+    dest      = 'markov',
+    default   = '',
+    action    = 'store')
+runnerEnv['MARKOV'] = GetOption('markov')
+
 AddOption('--nosimcopy',
     dest      = 'simcopyOpt',
     default   = True,

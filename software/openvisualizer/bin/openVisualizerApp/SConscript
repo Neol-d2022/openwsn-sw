@@ -52,6 +52,8 @@ def uiRunner(target, source, env):
    
     if env['PATHTOPO']:
         argList.append('--pathTopo={0}'.format(env['PATHTOPO']))
+    if env['MARKOV']:
+        argList.append('--markov={0}'.format(env['MARKOV']))
  
     if env['TRACEOPT']:
         argList.append('--trace')

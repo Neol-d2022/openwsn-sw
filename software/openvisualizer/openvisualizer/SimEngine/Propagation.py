@@ -33,6 +33,12 @@ class Propagation(eventBusClient.eventBusClient):
         self.dataLock             = threading.Lock()
         self.connections          = {}
         self.pendingTxEnd         = []
+        self.errModel             = 'markov2'    # tested by YYS 2016/8/30
+        #self.errModel             = ''
+        self.links                = {}    # tested by YYS 2016/8/30
+        self.txHistory            = {}    # tested by YYS 2016/8/30          
+        self.txTotal              = 0    # tested by YYS 2016/8/31
+        self.txGood               = 0    # tested by YYS 2016/8/31
         
         # logging
         self.log                  = logging.getLogger('Propagation')
@@ -56,6 +62,8 @@ class Propagation(eventBusClient.eventBusClient):
                 },
             ]
         )
+        
+        # for 2nd order Markov error model
         
     #======================== public ==========================================
     
@@ -170,6 +178,43 @@ class Propagation(eventBusClient.eventBusClient):
             except KeyError:
                 pass # did not exist
     
+    # tested by YYS 2016/8/30
+    def createLink(self,fromMote,toMote,p00_0,p01_0,p10_0,p11_0):  
+        
+        with self.dataLock:       
+           
+            if fromMote not in self.links:    # dict
+                self.links[fromMote] = {}
+            if toMote not in self.links[fromMote]:    # dict
+                self.links[fromMote][toMote] = {}
+            self.links[fromMote][toMote]['p00_0'] = p00_0
+            self.links[fromMote][toMote]['p01_0'] = p01_0
+            self.links[fromMote][toMote]['p10_0'] = p10_0
+            self.links[fromMote][toMote]['p11_0'] = p11_0
+            
+            if toMote not in self.links:    # dict
+                self.links[toMote] = {}
+            if fromMote not in self.links[toMote]:    # dict
+                self.links[toMote][fromMote] = {}
+            self.links[toMote][fromMote]['p00_0'] = p00_0
+            self.links[toMote][fromMote]['p01_0'] = p01_0
+            self.links[toMote][fromMote]['p10_0'] = p10_0
+            self.links[toMote][fromMote]['p11_0'] = p11_0
+            
+            if fromMote not in self.txHistory:    # dict
+                self.txHistory[fromMote] = {}
+            if toMote not in self.txHistory[fromMote]:    # dict
+                self.txHistory[fromMote][toMote] = {}
+            self.txHistory[fromMote][toMote]['last2'] = 0    # last last tx is success. 0:good
+            self.txHistory[fromMote][toMote]['last'] = 0     # last tx is success. 0:good
+            
+            if toMote not in self.txHistory:    # dict
+                self.txHistory[toMote] = {}
+            if fromMote not in self.txHistory[toMote]:    # dict
+                self.txHistory[toMote][fromMote] = {}
+            self.txHistory[toMote][fromMote]['last2'] = 0    # last last tx is success. 0:good
+            self.txHistory[toMote][fromMote]['last'] = 0     # last tx is success. 0:good
+                
     #======================== indication from eventBus ========================
     
     def _indicateTxStart(self,sender,signal,data):
@@ -178,14 +223,43 @@ class Propagation(eventBusClient.eventBusClient):
         
         if fromMote in self.connections:
             for (toMote,pdr) in self.connections[fromMote].items():
-                if random.random()<=pdr:
-                    
-                    # indicate start of transmission
-                    mh = self.engine.getMoteHandlerById(toMote)
-                    mh.bspRadio.indicateTxStart(fromMote,packet,channel)
-                    
-                    # remember to signal end of transmission
-                    self.pendingTxEnd += [(fromMote,toMote)]
+                if self.errModel == 'markov2':
+                    if self.txHistory[fromMote][toMote]['last2'] == 0:
+                        if self.txHistory[fromMote][toMote]['last'] == 0:
+                            pdr = self.links[fromMote][toMote]['p00_0']
+                        else:
+                            pdr = self.links[fromMote][toMote]['p01_0']
+                    else:
+                        if self.txHistory[fromMote][toMote]['last'] == 0:
+                            pdr = self.links[fromMote][toMote]['p10_0']
+                        else:
+                            pdr = self.links[fromMote][toMote]['p11_0']
+                            
+                    self.txHistory[fromMote][toMote]['last2'] = self.txHistory[fromMote][toMote]['last']
+                    self.txTotal += 1
+                    if random.random()>pdr:    # tx failed                        
+                        self.txHistory[fromMote][toMote]['last'] = 1    # 1:bad
+                    else:
+                        self.txHistory[fromMote][toMote]['last'] = 0    # 0:good
+                        self.txGood += 1
+                        
+                        # indicate start of transmission
+                        mh = self.engine.getMoteHandlerById(toMote)
+                        mh.bspRadio.indicateTxStart(fromMote,packet,channel)
+                        
+                        # remember to signal end of transmission
+                        self.pendingTxEnd += [(fromMote,toMote)]
+                    print 'Good/Total: ' + str(self.txGood) + '/' + str(self.txTotal)
+                                                
+                else:    # Original error model, i.e. PDR only
+                    if random.random()<=pdr:
+                        
+                        # indicate start of transmission
+                        mh = self.engine.getMoteHandlerById(toMote)
+                        mh.bspRadio.indicateTxStart(fromMote,packet,channel)
+                        
+                        # remember to signal end of transmission
+                        self.pendingTxEnd += [(fromMote,toMote)]
     
     def _indicateTxEnd(self,sender,signal,data):
         

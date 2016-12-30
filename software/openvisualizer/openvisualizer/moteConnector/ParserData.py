@@ -76,13 +76,54 @@ class ParserData(Parser.Parser):
         if log.isEnabledFor(logging.DEBUG):
             log.debug("packet without source,dest and asn {0}".format(input))
         
+
+        # start -- trick for utyphoon
+        # example packet. The last 17 bytes is the application payload.
+        # [241, 130, 5, 7, 232, 122, 17, 17, 20, 21, 146, 204, 0, 0, 0, 2, 20, 21, 146, 204, 0, 0, 0, 1, 
+        # 58, 153, 58, 153, 0, 25, 125, 12, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+        # port 15001==0x3a,0x99
+        if (len(input) >31):
+           if (input[len(input)-23]==58 and input[len(input)-22]==153):
+               aux      = input[len(input)-5:]               # last 5 bytes of the packet are the ASN in the UDP packet
+               diff     = self._asndiference(aux, asnbytes)  # calculate difference 
+               timeinms = diff*self.MSPERSLOT                # compute time in ms
+               SN       = struct.unpack('<I', bytearray(input[len(input)-5:len(input)-1]))[0]
+               data_4B  = struct.unpack('<I', bytearray(input[len(input)-9:len(input)-5]))[0]
+               node     = input[len(input)-17:len(input)-9] # the node address
+
+               #print 'ASN of Mote = ' + repr(aux)
+               #print 'ASN of Sink = ' + repr(asnbytes)
+               #print 'Transmission time (ms) = ' + repr(timeinms)
+               #print 'SN = ' + repr(SN)
+               print 'data_4B = ' + repr(data_4B)
+               #print 'node = ' + str(node)
+               fn = 'log_data_pkt_from_' + str(node[6]*256+node[7])+ '.txt'
+               f = open(fn,'a')
+               f.write(repr(data_4B)+'\n')
+               f.close()
+
+               if (diff<0xFFFFFFFF):
+               # notify latency manager component. only if a valid value
+                  dispatcher.send(
+                     sender        = 'parserData',
+                     signal        = 'typhoon',
+                     data          = (node,data_4B,SN,timeinms),
+                  )
+               else:
+                   # this usually happens when the serial port framing is not correct and more than one message is parsed at the same time. this will be solved with HDLC framing.
+                   print "Wrong latency computation {0} = {1} mS".format(str(node),timeinms)
+                   print ",".join(hex(c) for c in input)
+                   log.warning("Wrong latency computation {0} = {1} mS".format(str(node),timeinms))
+                   pass
+        # end -- trick for utyphoon
+        
         # when the packet goes to internet it comes with the asn at the beginning as timestamp.
          
         # cross layer trick here. capture UDP packet from udpLatency and get ASN to compute latency.
         # then notify a latency component that will plot that information.
         # port 61001==0xee,0x49
-        if len(input) >37:
-           if input[36]==238 and input[37]==73:
+        if (len(input) >37):
+           if (input[36]==238 and input[37]==73):
             # udp port 61001 for udplatency app.
                aux      = input[len(input)-5:]               # last 5 bytes of the packet are the ASN in the UDP latency packet
                diff     = self._asndiference(aux,asnbytes)   # calculate difference 
@@ -91,7 +132,7 @@ class ParserData(Parser.Parser):
                parent   = input[len(input)-21:len(input)-13] # the parent node is the first element (used to know topology)
                node     = input[len(input)-13:len(input)-5]  # the node address
                
-               if timeinus<0xFFFF:
+               if (timeinus<0xFFFF):
                # notify latency manager component. only if a valid value
                   dispatcher.send(
                      sender        = 'parserData',
@@ -117,7 +158,7 @@ class ParserData(Parser.Parser):
        
         eventType='data'
         # notify a tuple including source as one hop away nodes elide SRC address as can be inferred from MAC layer header
-        return eventType, (source, input)
+        return (eventType,(source,input))
 
  #======================== private =========================================
  
@@ -125,18 +166,18 @@ class ParserData(Parser.Parser):
       
        asninit = struct.unpack('<HHB',''.join([chr(c) for c in init]))
        asnend  = struct.unpack('<HHB',''.join([chr(c) for c in end]))
-       if asnend[2] != asninit[2]: #'byte4'
+       if (asnend[2] != asninit[2]): #'byte4'
           return 0xFFFFFFFF
        else:
            pass
        
-       diff = 0
-       if asnend[1] == asninit[1]:#'bytes2and3'
+       diff = 0;
+       if (asnend[1] == asninit[1]):#'bytes2and3'
           return asnend[0]-asninit[0]#'bytes0and1'
        else:
-          if asnend[1]-asninit[1]==1:##'bytes2and3'              diff  = asnend[0]#'bytes0and1'
+          if (asnend[1]-asninit[1]==1):##'bytes2and3'              diff  = asnend[0]#'bytes0and1'
               diff += 0xffff-asninit[0]#'bytes0and1'
-              diff += 1
+              diff += 1;
           else:   
               diff = 0xFFFFFFFF
        

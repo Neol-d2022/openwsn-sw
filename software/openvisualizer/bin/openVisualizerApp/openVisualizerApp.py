@@ -37,7 +37,7 @@ class OpenVisualizerApp(object):
     top-level functionality for several UI clients.
     '''
     
-    def __init__(self,confdir,datadir,logdir,simulatorMode,numMotes,trace,debug,simTopology,iotlabmotes, pathTopo, roverMode):
+    def __init__(self,confdir,datadir,logdir,simulatorMode,numMotes,trace,debug,simTopology,iotlabmotes, pathTopo, markov, roverMode):
         
         # store params
         self.confdir              = confdir
@@ -49,8 +49,11 @@ class OpenVisualizerApp(object):
         self.debug                = debug
         self.iotlabmotes          = iotlabmotes
         self.pathTopo             = pathTopo
+        self.errModel             = 'markov2'    # tested by YYS 2016/8/30
+        self.markov               = markov
+        #self.errModel             = ''             
         self.roverMode            = roverMode
-
+        
         # local variables
         self.eventBusMonitor      = eventBusMonitor.eventBusMonitor()
         self.openLbr              = openLbr.OpenLbr()
@@ -76,7 +79,16 @@ class OpenVisualizerApp(object):
                 print err
                 app.close()
                 os.kill(os.getpid(), signal.SIGTERM)
-
+        
+        # tested by YYS 2016/8/30
+        if self.errModel == 'markov2' and self.simulatorMode:
+            try:
+                emConfig = open(markov)
+                em = json.load(emConfig)
+            except Exception as err:
+                print err
+                app.close()
+                os.kill(os.getpid(), signal.SIGTERM)   
         
         # create a moteProbe for each mote
         if self.simulatorMode:
@@ -99,7 +111,7 @@ class OpenVisualizerApp(object):
             
         else:
             # in "hardware" mode, motes are connected to the serial port
-
+            
             self.moteProbes       = [
                 moteProbe.moteProbe(serialport=p) for p in moteProbe.findSerialPorts()
             ]
@@ -156,6 +168,18 @@ class OpenVisualizerApp(object):
                 pdr = float(co['pdr'])
                 self.simengine.propagation.createConnection(fromMote,toMote)
                 self.simengine.propagation.updateConnection(fromMote,toMote,pdr)
+            
+            # tested by YYS 2016/8/30
+            if self.errModel == 'markov2':
+                links = em['links']
+                for co2 in links:
+                    fromMote = int(co2['fromMote'])
+                    toMote = int(co2['toMote'])
+                    p00_0 = float(co2['p00_0'])
+                    p01_0 = float(co2['p01_0'])
+                    p10_0 = float(co2['p10_0'])
+                    p11_0 = float(co2['p11_0'])
+                    self.simengine.propagation.createLink(fromMote,toMote,p00_0,p01_0,p10_0,p11_0)
             
             # store DAGroot moteids in DAGrootList
             DAGrootL = topo['DAGrootList']
@@ -324,6 +348,7 @@ def main(parser=None, roverMode=False):
         simTopology     = argspace.simTopology,
         iotlabmotes     = argspace.iotlabmotes,
         pathTopo        = argspace.pathTopo,
+        markov          = argspace.markov,
         roverMode       = roverMode
     )
 
@@ -376,8 +401,13 @@ def _addParserArgs(parser):
         action     = 'store',
         help       = 'a topology can be loaded from a json file'
     )
-
-
+    parser.add_argument('-m', '--markov', 
+        dest       = 'markov',
+        default    = 'default',
+        action     = 'store',
+        help       = 'a markov definition file'
+    )
+    
 def _forceSlashSep(ospath, debug):
     '''
     Converts a Windows-based path to use '/' as the path element separator.
