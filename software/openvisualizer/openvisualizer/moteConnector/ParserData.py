@@ -37,6 +37,10 @@ class ParserData(Parser.Parser):
           'asn_0_1',                   # H
          ]
     
+        self._asn_mote= ['asn_4',                     # B
+          'asn_2_3',                   # H
+          'asn_0_1',                   # H
+         ]
     
     #======================== public ==========================================
     
@@ -117,6 +121,92 @@ class ParserData(Parser.Parser):
                    pass
         # end -- trick for utyphoon
         
+        # ublizzard
+        if (len(input) >37):
+            if (input[len(input)-29]==240 and input[len(input)-28]==178):         
+                print "parsedata: without power, one neighbor"               
+                ap_payload = input[-23:]
+                dispatcher.send(
+                    sender        = 'parserData',
+                    signal        = 'hurricane',
+                    data          = (ap_payload,0,1),
+                )
+            elif (input[len(input)-31]==240 and input[len(input)-30]==178):         
+                print "parsedata: with power, one neighbor"               
+                ap_payload = input[-25:]
+                dispatcher.send(
+                    sender        = 'parserData',
+                    signal        = 'hurricane',
+                    data          = (ap_payload,1,1),
+                )
+            elif (input[len(input)-41]==240 and input[len(input)-40]==178):         
+                print "parsedata: without power, two neighbors"               
+                ap_payload = input[-35:]
+                dispatcher.send(
+                    sender        = 'parserData',
+                    signal        = 'hurricane',
+                    data          = (ap_payload,0,2),
+                )
+            elif (input[len(input)-43]==240 and input[len(input)-42]==178):         
+                print "parsedata: with power, two neighbors"               
+                ap_payload = input[-37:]
+                dispatcher.send(
+                    sender        = 'parserData',
+                    signal        = 'hurricane',
+                    data          = (ap_payload,1,2),
+                )
+            elif (input[len(input)-53]==240 and input[len(input)-52]==178):         
+                print "parsedata: without power, three neighbors"               
+                ap_payload = input[-47:]
+                dispatcher.send(
+                    sender        = 'parserData',
+                    signal        = 'hurricane',
+                    data          = (ap_payload,0,3),
+                )
+            elif (input[len(input)-55]==240 and input[len(input)-54]==178):         
+                print "parsedata: with power, three neighbors"               
+                ap_payload = input[-49:]
+                dispatcher.send(
+                    sender        = 'parserData',
+                    signal        = 'hurricane',
+                    data          = (ap_payload,1,3),
+                )
+
+#==========================
+
+        if (len(input) >35):
+           if (input[len(input)-27]==240 and input[len(input)-26]==177):
+               aux      = input[len(input)-5:]               # last 5 bytes of the packet are the ASN in the UDP packet
+               diff     = self._asndiference(aux,asnbytes)   # calculate difference 
+               timeinms = diff*self.MSPERSLOT                # compute time in ms
+               SN       = struct.unpack('<I', bytearray(input[len(input)-5:len(input)-1]))[0]
+               numTxAck = struct.unpack('<I', bytearray(input[len(input)-9:len(input)-5]))[0]
+               numTx    = struct.unpack('<I', bytearray(input[len(input)-13:len(input)-9]))[0] 
+               node     = input[len(input)-21:len(input)-13] # the node address
+
+               #print 'ASN of mote = ' + repr(aux)
+               #print 'ASN of NM = ' + repr(asnbytes)
+               #print 'timeinms = ' + repr(timeinms)
+               #print 'SN = ' + repr(SN)
+               #print 'numTxAck = ' + repr(numTxAck)
+               #print 'numTx = ' + repr(numTx)
+               #print 'node = ' + str(node)
+
+               if (diff<0xFFFFFFFF):
+               # notify latency manager component. only if a valid value
+                  dispatcher.send(
+                     sender        = 'parserData',
+                     signal        = 'blizzard',
+                     data          = (node,numTx,numTxAck,SN,timeinms),
+                  )
+               else:
+                   # this usually happens when the serial port framing is not correct and more than one message is parsed at the same time. this will be solved with HDLC framing.
+                   print "Wrong latency computation {0} = {1} mS".format(str(node),timeinms)
+                   print ",".join(hex(c) for c in input)
+                   log.warning("Wrong latency computation {0} = {1} mS".format(str(node),timeinms))
+                   pass
+        # end - ublizzard
+
         # when the packet goes to internet it comes with the asn at the beginning as timestamp.
          
         # cross layer trick here. capture UDP packet from udpLatency and get ASN to compute latency.
@@ -156,6 +246,7 @@ class ParserData(Parser.Parser):
         else:
            pass      
        
+        print "UDP packet {0}".format(",".join(str(c) for c in input))
         eventType='data'
         # notify a tuple including source as one hop away nodes elide SRC address as can be inferred from MAC layer header
         return (eventType,(source,input))

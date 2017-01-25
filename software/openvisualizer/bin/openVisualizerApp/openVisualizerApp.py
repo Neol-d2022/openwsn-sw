@@ -25,6 +25,8 @@ from openvisualizer.RPL             import RPL
 from openvisualizer.openLbr         import openLbr
 from openvisualizer.openTun         import openTun
 from openvisualizer.RPL             import UDPInject
+from openvisualizer.RPL             import Blizzard     # YYS 2015/11/19
+from openvisualizer.RPL             import Hurricane    # YYS 2015/12/10
 from openvisualizer.RPL             import topology
 from openvisualizer                 import appdirs
 from openvisualizer.remoteConnectorServer   import remoteConnectorServer
@@ -60,6 +62,8 @@ class OpenVisualizerApp(object):
         self.rpl                  = RPL.RPL()
         self.topology             = topology.topology()
         self.udpInject            = UDPInject.UDPInject()
+        self.blizzard             = Blizzard.Blizzard()    # YYS 2015/11/19
+        self.hurricane            = Hurricane.Hurricane()    # YYS 2015/11/19
         self.DAGrootList          = []
         # create openTun call last since indicates prefix
         self.openTun              = openTun.create() 
