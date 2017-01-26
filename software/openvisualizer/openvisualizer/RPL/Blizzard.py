@@ -19,7 +19,7 @@ from openvisualizer.eventBus import eventBusClient
 
 class Blizzard(eventBusClient.eventBusClient):
    
-    BLIZZARD_PORT  = 61617
+    BLIZZARD_PORT  = 61619
     
     def __init__(self):
                 # initialize parent class

@@ -174,8 +174,8 @@ class ParserData(Parser.Parser):
 
 #==========================
 
-        if (len(input) >35):
-           if (input[len(input)-27]==240 and input[len(input)-26]==177):
+        if (len(input) >27):
+           if (input[len(input)-27]==240 and input[len(input)-26]==179):
                aux      = input[len(input)-5:]               # last 5 bytes of the packet are the ASN in the UDP packet
                diff     = self._asndiference(aux,asnbytes)   # calculate difference 
                timeinms = diff*self.MSPERSLOT                # compute time in ms
@@ -246,7 +246,7 @@ class ParserData(Parser.Parser):
         else:
            pass      
        
-        print "UDP packet {0}".format(",".join(str(c) for c in input))
+        #print "UDP packet {0}".format(",".join(str(c) for c in input))
         eventType='data'
         # notify a tuple including source as one hop away nodes elide SRC address as can be inferred from MAC layer header
         return (eventType,(source,input))

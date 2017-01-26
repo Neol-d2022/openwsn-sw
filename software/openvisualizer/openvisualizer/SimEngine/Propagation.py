@@ -249,7 +249,7 @@ class Propagation(eventBusClient.eventBusClient):
                         
                         # remember to signal end of transmission
                         self.pendingTxEnd += [(fromMote,toMote)]
-                    print 'Good/Total: ' + str(self.txGood) + '/' + str(self.txTotal)
+                    #print 'Good/Total: ' + str(self.txGood) + '/' + str(self.txTotal)
                                                 
                 else:    # Original error model, i.e. PDR only
                     if random.random()<=pdr:
