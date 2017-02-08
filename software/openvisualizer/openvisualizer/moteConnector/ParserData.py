@@ -174,7 +174,7 @@ class ParserData(Parser.Parser):
 
 #==========================
 
-        if (len(input) >27):
+        if (len(input) >35):
            if (input[len(input)-27]==58 and input[len(input)-26]==154):
                aux      = input[len(input)-5:]               # last 5 bytes of the packet are the ASN in the UDP packet
                diff     = self._asndiference(aux,asnbytes)   # calculate difference 
