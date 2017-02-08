@@ -19,7 +19,7 @@ from openvisualizer.eventBus import eventBusClient
 
 class Hurricane(eventBusClient.eventBusClient):
    
-    HURRICANE_PORT  = 61618
+    HURRICANE_PORT  = 15003
     
     def __init__(self):
                 # initialize parent class

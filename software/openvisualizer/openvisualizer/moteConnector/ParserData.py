@@ -123,7 +123,7 @@ class ParserData(Parser.Parser):
         
         # ublizzard
         if (len(input) >37):
-            if (input[len(input)-29]==240 and input[len(input)-28]==178):         
+            if (input[len(input)-29]==58 and input[len(input)-28]==155):         
                 print "parsedata: without power, one neighbor"               
                 ap_payload = input[-23:]
                 dispatcher.send(
@@ -131,7 +131,7 @@ class ParserData(Parser.Parser):
                     signal        = 'hurricane',
                     data          = (ap_payload,0,1),
                 )
-            elif (input[len(input)-31]==240 and input[len(input)-30]==178):         
+            elif (input[len(input)-31]==58 and input[len(input)-30]==155):         
                 print "parsedata: with power, one neighbor"               
                 ap_payload = input[-25:]
                 dispatcher.send(
@@ -139,7 +139,7 @@ class ParserData(Parser.Parser):
                     signal        = 'hurricane',
                     data          = (ap_payload,1,1),
                 )
-            elif (input[len(input)-41]==240 and input[len(input)-40]==178):         
+            elif (input[len(input)-41]==58 and input[len(input)-40]==155):         
                 print "parsedata: without power, two neighbors"               
                 ap_payload = input[-35:]
                 dispatcher.send(
@@ -147,7 +147,7 @@ class ParserData(Parser.Parser):
                     signal        = 'hurricane',
                     data          = (ap_payload,0,2),
                 )
-            elif (input[len(input)-43]==240 and input[len(input)-42]==178):         
+            elif (input[len(input)-43]==58 and input[len(input)-42]==155):         
                 print "parsedata: with power, two neighbors"               
                 ap_payload = input[-37:]
                 dispatcher.send(
@@ -155,7 +155,7 @@ class ParserData(Parser.Parser):
                     signal        = 'hurricane',
                     data          = (ap_payload,1,2),
                 )
-            elif (input[len(input)-53]==240 and input[len(input)-52]==178):         
+            elif (input[len(input)-53]==58 and input[len(input)-52]==155):         
                 print "parsedata: without power, three neighbors"               
                 ap_payload = input[-47:]
                 dispatcher.send(
@@ -163,7 +163,7 @@ class ParserData(Parser.Parser):
                     signal        = 'hurricane',
                     data          = (ap_payload,0,3),
                 )
-            elif (input[len(input)-55]==240 and input[len(input)-54]==178):         
+            elif (input[len(input)-55]==58 and input[len(input)-54]==155):         
                 print "parsedata: with power, three neighbors"               
                 ap_payload = input[-49:]
                 dispatcher.send(
@@ -175,7 +175,7 @@ class ParserData(Parser.Parser):
 #==========================
 
         if (len(input) >27):
-           if (input[len(input)-27]==240 and input[len(input)-26]==179):
+           if (input[len(input)-27]==58 and input[len(input)-26]==154):
                aux      = input[len(input)-5:]               # last 5 bytes of the packet are the ASN in the UDP packet
                diff     = self._asndiference(aux,asnbytes)   # calculate difference 
                timeinms = diff*self.MSPERSLOT                # compute time in ms
