@@ -49,9 +49,9 @@ class Hurricane(eventBusClient.eventBusClient):
         Hurricane application. This application listens at port 61618 and 
         records it.                
         '''
-        print data[0]        
-        print data[1]
-        print data[2]
+        #print data[0]        
+        #print data[1]
+        #print data[2]
         
         f = open('topology.bin', 'ab')
         newFileByteArray = bytearray( data[0] )
