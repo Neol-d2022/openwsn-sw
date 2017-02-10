@@ -136,7 +136,8 @@ class ParserData(Parser.Parser):
                     signal        = 'hurricane',
                     data          = (ap_payload,0,1),
                 )
-            elif (input[len(input)-31]==58 and input[len(input)-30]==155):         
+        if (len(input) >39):
+            if (input[len(input)-31]==58 and input[len(input)-30]==155):         
                 print "parsedata: with power, one neighbor"               
                 ap_payload = input[-25:]
                 eventType = 'moteApp'
@@ -145,7 +146,8 @@ class ParserData(Parser.Parser):
                     signal        = 'hurricane',
                     data          = (ap_payload,1,1),
                 )
-            elif (input[len(input)-41]==58 and input[len(input)-40]==155):         
+        if (len(input) >49):
+            if (input[len(input)-41]==58 and input[len(input)-40]==155):         
                 print "parsedata: without power, two neighbors"               
                 ap_payload = input[-35:]
                 eventType = 'moteApp'
@@ -154,7 +156,8 @@ class ParserData(Parser.Parser):
                     signal        = 'hurricane',
                     data          = (ap_payload,0,2),
                 )
-            elif (input[len(input)-43]==58 and input[len(input)-42]==155):         
+        if (len(input) >51):
+            if (input[len(input)-43]==58 and input[len(input)-42]==155):         
                 print "parsedata: with power, two neighbors"               
                 ap_payload = input[-37:]
                 eventType = 'moteApp'
@@ -163,7 +166,8 @@ class ParserData(Parser.Parser):
                     signal        = 'hurricane',
                     data          = (ap_payload,1,2),
                 )
-            elif (input[len(input)-53]==58 and input[len(input)-52]==155):         
+        if (len(input) >61):
+            if (input[len(input)-53]==58 and input[len(input)-52]==155):         
                 print "parsedata: without power, three neighbors"               
                 ap_payload = input[-47:]
                 eventType = 'moteApp'
@@ -172,7 +176,8 @@ class ParserData(Parser.Parser):
                     signal        = 'hurricane',
                     data          = (ap_payload,0,3),
                 )
-            elif (input[len(input)-55]==58 and input[len(input)-54]==155):         
+        if (len(input) >63):
+            if (input[len(input)-55]==58 and input[len(input)-54]==155):         
                 print "parsedata: with power, three neighbors"               
                 ap_payload = input[-49:]
                 eventType = 'moteApp'
