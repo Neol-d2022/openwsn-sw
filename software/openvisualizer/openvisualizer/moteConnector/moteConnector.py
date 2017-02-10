@@ -81,8 +81,9 @@ class moteConnector(eventBusClient.eventBusClient):
             log.error(str(err))
             pass
         else:
-            # dispatch
-            self.dispatch('fromMote.'+eventSubType,parsedNotif)
+            if(eventSubType!='moteApp'):
+                # dispatch
+                self.dispatch('fromMote.'+eventSubType,parsedNotif)
         
     #======================== eventBus interaction ============================
     

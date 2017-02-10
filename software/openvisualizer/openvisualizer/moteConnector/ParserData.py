@@ -80,6 +80,7 @@ class ParserData(Parser.Parser):
         if log.isEnabledFor(logging.DEBUG):
             log.debug("packet without source,dest and asn {0}".format(input))
         
+        eventType='data'
 
         # start -- trick for utyphoon
         # example packet. The last 17 bytes is the application payload.
@@ -105,20 +106,23 @@ class ParserData(Parser.Parser):
                f = open(fn,'a')
                f.write(repr(data_4B)+'\n')
                f.close()
+               eventType = 'moteApp'
 
-               if (diff<0xFFFFFFFF):
+               #if (diff<0xFFFFFFFF):
                # notify latency manager component. only if a valid value
-                  dispatcher.send(
-                     sender        = 'parserData',
-                     signal        = 'typhoon',
-                     data          = (node,data_4B,SN,timeinms),
-                  )
-               else:
+                  # OOPS.. no receiver
+                  #dispatcher.send(
+                  #   sender        = 'parserData',
+                  #   signal        = 'typhoon', 
+                  #   data          = (node,data_4B,SN,timeinms),
+                  #)
+               #else:
+               if (diff>=0xFFFFFFFF):
                    # this usually happens when the serial port framing is not correct and more than one message is parsed at the same time. this will be solved with HDLC framing.
                    print "Wrong latency computation {0} = {1} mS".format(str(node),timeinms)
                    print ",".join(hex(c) for c in input)
                    log.warning("Wrong latency computation {0} = {1} mS".format(str(node),timeinms))
-                   pass
+               pass
         # end -- trick for utyphoon
         
         # ublizzard
@@ -126,6 +130,7 @@ class ParserData(Parser.Parser):
             if (input[len(input)-29]==58 and input[len(input)-28]==155):         
                 print "parsedata: without power, one neighbor"               
                 ap_payload = input[-23:]
+                eventType = 'moteApp'
                 dispatcher.send(
                     sender        = 'parserData',
                     signal        = 'hurricane',
@@ -134,6 +139,7 @@ class ParserData(Parser.Parser):
             elif (input[len(input)-31]==58 and input[len(input)-30]==155):         
                 print "parsedata: with power, one neighbor"               
                 ap_payload = input[-25:]
+                eventType = 'moteApp'
                 dispatcher.send(
                     sender        = 'parserData',
                     signal        = 'hurricane',
@@ -142,6 +148,7 @@ class ParserData(Parser.Parser):
             elif (input[len(input)-41]==58 and input[len(input)-40]==155):         
                 print "parsedata: without power, two neighbors"               
                 ap_payload = input[-35:]
+                eventType = 'moteApp'
                 dispatcher.send(
                     sender        = 'parserData',
                     signal        = 'hurricane',
@@ -150,6 +157,7 @@ class ParserData(Parser.Parser):
             elif (input[len(input)-43]==58 and input[len(input)-42]==155):         
                 print "parsedata: with power, two neighbors"               
                 ap_payload = input[-37:]
+                eventType = 'moteApp'
                 dispatcher.send(
                     sender        = 'parserData',
                     signal        = 'hurricane',
@@ -158,6 +166,7 @@ class ParserData(Parser.Parser):
             elif (input[len(input)-53]==58 and input[len(input)-52]==155):         
                 print "parsedata: without power, three neighbors"               
                 ap_payload = input[-47:]
+                eventType = 'moteApp'
                 dispatcher.send(
                     sender        = 'parserData',
                     signal        = 'hurricane',
@@ -166,6 +175,7 @@ class ParserData(Parser.Parser):
             elif (input[len(input)-55]==58 and input[len(input)-54]==155):         
                 print "parsedata: with power, three neighbors"               
                 ap_payload = input[-49:]
+                eventType = 'moteApp'
                 dispatcher.send(
                     sender        = 'parserData',
                     signal        = 'hurricane',
@@ -183,6 +193,8 @@ class ParserData(Parser.Parser):
                numTxAck = struct.unpack('<I', bytearray(input[len(input)-9:len(input)-5]))[0]
                numTx    = struct.unpack('<I', bytearray(input[len(input)-13:len(input)-9]))[0] 
                node     = input[len(input)-21:len(input)-13] # the node address
+
+               eventType = 'moteApp'
 
                #print 'ASN of mote = ' + repr(aux)
                #print 'ASN of NM = ' + repr(asnbytes)
@@ -221,6 +233,8 @@ class ParserData(Parser.Parser):
                SN       = input[len(input)-23:len(input)-21] # SN sent by mote
                parent   = input[len(input)-21:len(input)-13] # the parent node is the first element (used to know topology)
                node     = input[len(input)-13:len(input)-5]  # the node address
+
+               eventType = 'moteApp'
                
                if (timeinus<0xFFFF):
                # notify latency manager component. only if a valid value
@@ -247,7 +261,6 @@ class ParserData(Parser.Parser):
            pass      
        
         #print "UDP packet {0}".format(",".join(str(c) for c in input))
-        eventType='data'
         # notify a tuple including source as one hop away nodes elide SRC address as can be inferred from MAC layer header
         return (eventType,(source,input))
 

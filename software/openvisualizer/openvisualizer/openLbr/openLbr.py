@@ -29,8 +29,7 @@ class OpenLbr(eventBusClient.eventBusClient):
        The IPv6 Flow Label within a RPL domain  
     '''
     #implementing http://tools.ietf.org/html/draft-thubert-6man-flow-label-for-rpl-03
-    FLOW_LABEL_RPL_DOMAIN   = True
-
+    
     # http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xml 
     IANA_PROTOCOL_IPv6ROUTE  = 43
     IANA_UDP                 = 17
@@ -222,7 +221,7 @@ class OpenLbr(eventBusClient.eventBusClient):
             lowpan['nextHop'] = lowpan['route'][len(lowpan['route'])-1] #get next hop as this has to be the destination address, this is the last element on the list
             # turn dictionary of fields into raw bytes
             lowpan_bytes     = self.reassemble_lowpan(lowpan)
-            #print lowpan_bytes
+            
             # log
             if log.isEnabledFor(logging.DEBUG):
                 log.debug(self._format_lowpan(lowpan,lowpan_bytes))
@@ -266,15 +265,6 @@ class OpenLbr(eventBusClient.eventBusClient):
                 ipv6dic['next_header'] = ipv6dic['hop_next_header']
                 
             #===================================================================
-            if (self.FLOW_LABEL_RPL_DOMAIN and 'flags' in ipv6dic):
-                #if flow label si formatted following thubert-flow-label draft then check for loops as if it was a hop route header
-                if ((ipv6dic['flags'] & self.O_FLAG) == self.O_FLAG):    
-                    log.error("detected possible downstream link on upstream route from {0}".format(",".join(str(c) for c in ipv6dic['src_addr'])))
-                
-                if ((ipv6dic['flags'] & self.R_FLAG) == self.R_FLAG):
-                    #error -- loop in the route
-                    log.error("detected possible loop on upstream route from {0}".format(",".join(str(c) for c in ipv6dic['src_addr'])))
-                
 
             if ipv6dic['next_header']==self.IPV6_HEADER:
                 #ipv6 header (inner)
@@ -599,10 +589,7 @@ class OpenLbr(eventBusClient.eventBusClient):
         else:
             raise NotImplementedError()
         # next header is in NHC format
-        if len(lowpan['nh'])==1:
-            nh               = self.IPHC_NH_INLINE
-        else:
-            nh               = self.IPHC_NH_COMPRESSED
+        nh               = self.IPHC_NH_INLINE
         if   lowpan['hlim']==1:
             hlim             = self.IPHC_HLIM_1
             lowpan['hlim'] = []
@@ -650,12 +637,7 @@ class OpenLbr(eventBusClient.eventBusClient):
         returnVal           += lowpan['tf']
 
         # nh
-        if len(lowpan['route'])==1:
-            # destination is next hop
-            returnVal       += lowpan['nh']
-        else:
-            # source route needed
-            returnVal       += [self.IANA_PROTOCOL_IPv6ROUTE]
+        returnVal           += lowpan['nh']
         
         # hlim
         returnVal           += lowpan['hlim']
@@ -667,25 +649,7 @@ class OpenLbr(eventBusClient.eventBusClient):
         returnVal           += lowpan['src_addr']
         
         # dst_addr
-        if len(lowpan['route'])>1:
-            # source route needed
-            if (len(lowpan['dst_addr'])==16): #this is a hack by now as the src routing table is only 8B and not 128, so I need to get the prefix from the destination address as I know are the same.
-                prefix=lowpan['dst_addr'][:8]
-
-            returnVal       += prefix + lowpan['nextHop']                # dest address is next hop in source routing -- poipoi xv prefix needs to be removed once hc works well
-            returnVal       += lowpan['nh']                     # Next Header
-            returnVal       += [len(lowpan['route'])-1]           # Hdr Ext Len. -1 to remove last element
-            returnVal       += [self.SR_FIR_TYPE]               # Routing Type. 3 for source routing
-            returnVal       += [len(lowpan['route'])-1]           # Segments Left. -1 because the first hop goes to the ipv6 destination address.
-            returnVal       += [0x08 << 4 | 0x08]               # CmprI | CmprE. All prefixes elided.
-            returnVal       += [0x00,0x00,0x00]                 # padding (4b) + reserved (20b)
-            for hop in lowpan['route'][:len(lowpan['route'])-1]:  #skip first hop as it is in the destination address
-               returnVal    += hop
-
-        else:# in case of 1hop destination address is the same as ipv6 destination address
-             # dst_addr
-             returnVal           += lowpan['dst_addr']
-
+        returnVal           += lowpan['dst_addr']
 
         # payload
         returnVal           += lowpan['payload']
@@ -699,6 +663,7 @@ class OpenLbr(eventBusClient.eventBusClient):
         pkt_ipv6 = {}
         mac_prev_hop=data[0]
         pkt_lowpan=data[1]
+        pkt_ipv6['src_addr'] = [0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00]
 
         if pkt_lowpan[0]==self.PAGE_ONE_DISPATCH:
             ptr = 1
@@ -750,12 +715,6 @@ class OpenLbr(eventBusClient.eventBusClient):
             tf = ((pkt_lowpan[0]) >> 3) & 0x03
             if tf == self.IPHC_TF_3B:
                 pkt_ipv6['flow_label'] = ((pkt_lowpan[ptr]) << 16) + ((pkt_lowpan[ptr+1]) << 8) + ((pkt_lowpan[ptr+2]) << 0)
-                #print "flow label {0}".format(pkt_ipv6['flow_label'])
-                if (self.FLOW_LABEL_RPL_DOMAIN):
-                    pkt_ipv6['flags']=((pkt_lowpan[ptr]) << 16);
-                    #log this situation as an error to see it 
-                    log.error("FLOW_LABEL_RPL_DOMAIN draft implemented")
-                    pkt_ipv6['flow_label'] = 0  
                 ptr = ptr + 3
             elif tf == self.IPHC_TF_ELIDED:
                 pkt_ipv6['flow_label'] = 0
