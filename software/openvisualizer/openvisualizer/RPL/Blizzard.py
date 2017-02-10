@@ -66,11 +66,11 @@ class Blizzard(eventBusClient.eventBusClient):
         latency    = data[4]
         
         
-        print 'Blizzard - timeinms = ' + repr(latency)
-        print 'Blizzard - SN = ' + repr(SN)
-        print 'Blizzard - numTxAck = ' + repr(numTxAck)
-        print 'Blizzard - numTx = ' + repr(numTx)
-        print 'Blizzard - node = ' + str(address)
+        #print 'Blizzard - timeinms = ' + repr(latency)
+        #print 'Blizzard - SN = ' + repr(SN)
+        #print 'Blizzard - numTxAck = ' + repr(numTxAck)
+        #print 'Blizzard - numTx = ' + repr(numTx)
+        #print 'Blizzard - node = ' + str(address)
         
         f = open(address + '.txt', 'a')
         t = datetime.now()

@@ -99,7 +99,7 @@ class ParserData(Parser.Parser):
                #print 'ASN of Sink = ' + repr(asnbytes)
                #print 'Transmission time (ms) = ' + repr(timeinms)
                #print 'SN = ' + repr(SN)
-               print 'data_4B = ' + repr(data_4B)
+               #print 'data_4B = ' + repr(data_4B)
                #print 'node = ' + str(node)
                fn = 'log_data_pkt_from_' + str(node[6]*256+node[7])+ '.txt'
                f = open(fn,'a')
