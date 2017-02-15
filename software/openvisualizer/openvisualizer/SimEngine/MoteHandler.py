@@ -137,6 +137,7 @@ class MoteHandler(threading.Thread):
         mote.set_callback(notifId('leds_error_off'),                      self.bspLeds.cmd_error_off)
         mote.set_callback(notifId('leds_error_toggle'),                   self.bspLeds.cmd_error_toggle)
         mote.set_callback(notifId('leds_error_isOn'),                     self.bspLeds.cmd_error_isOn)
+        mote.set_callback(notifId('leds_error_blink'),                    self.bspLeds.cmd_error_blink)    # added by YYS 2017/02/14
         mote.set_callback(notifId('leds_radio_on'),                       self.bspLeds.cmd_radio_on)
         mote.set_callback(notifId('leds_radio_off'),                      self.bspLeds.cmd_radio_off)
         mote.set_callback(notifId('leds_radio_toggle'),                   self.bspLeds.cmd_radio_toggle)
