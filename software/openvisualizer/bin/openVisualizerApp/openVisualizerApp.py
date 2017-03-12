@@ -51,7 +51,7 @@ class OpenVisualizerApp(object):
         self.debug                = debug
         self.iotlabmotes          = iotlabmotes
         self.pathTopo             = pathTopo
-        self.errModel             = 'markov2'    # tested by YYS 2016/8/30
+        self.errModel             = 'standard'    # tested by YYS 2016/8/30
         self.markov               = markov
         #self.errModel             = ''             
         self.roverMode            = roverMode
