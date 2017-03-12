@@ -33,7 +33,7 @@ class Propagation(eventBusClient.eventBusClient):
         self.dataLock             = threading.Lock()
         self.connections          = {}
         self.pendingTxEnd         = []
-        self.errModel             = 'markov2'    # tested by YYS 2016/8/30
+        self.errModel             = 'standard'    # tested by YYS 2016/8/30
         #self.errModel             = ''
         self.links                = {}    # tested by YYS 2016/8/30
         self.txHistory            = {}    # tested by YYS 2016/8/30          
@@ -201,19 +201,19 @@ class Propagation(eventBusClient.eventBusClient):
             self.links[toMote][fromMote]['p10_0'] = p10_0
             self.links[toMote][fromMote]['p11_0'] = p11_0
             
-            if fromMote not in self.txHistory:    # dict
-                self.txHistory[fromMote] = {}
-            if toMote not in self.txHistory[fromMote]:    # dict
-                self.txHistory[fromMote][toMote] = {}
-            self.txHistory[fromMote][toMote]['last2'] = 0    # last last tx is success. 0:good
-            self.txHistory[fromMote][toMote]['last'] = 0     # last tx is success. 0:good
+            #if fromMote not in self.txHistory:    # dict
+            #    self.txHistory[fromMote] = {}
+            #if toMote not in self.txHistory[fromMote]:    # dict
+            #    self.txHistory[fromMote][toMote] = {}
+            #self.txHistory[fromMote][toMote]['last2'] = 0    # last last tx is success. 0:good
+            #self.txHistory[fromMote][toMote]['last'] = 0     # last tx is success. 0:good
             
-            if toMote not in self.txHistory:    # dict
-                self.txHistory[toMote] = {}
-            if fromMote not in self.txHistory[toMote]:    # dict
-                self.txHistory[toMote][fromMote] = {}
-            self.txHistory[toMote][fromMote]['last2'] = 0    # last last tx is success. 0:good
-            self.txHistory[toMote][fromMote]['last'] = 0     # last tx is success. 0:good
+            #if toMote not in self.txHistory:    # dict
+            #    self.txHistory[toMote] = {}
+            #if fromMote not in self.txHistory[toMote]:    # dict
+            #    self.txHistory[toMote][fromMote] = {}
+            #self.txHistory[toMote][fromMote]['last2'] = 0    # last last tx is success. 0:good
+            #self.txHistory[toMote][fromMote]['last'] = 0     # last tx is success. 0:good
                 
     #======================== indication from eventBus ========================
     
