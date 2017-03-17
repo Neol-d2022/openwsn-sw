@@ -72,11 +72,11 @@ class Blizzard(eventBusClient.eventBusClient):
         #print 'Blizzard - numTx = ' + repr(numTx)
         #print 'Blizzard - node = ' + str(address)
         
-        f = open(address + '.txt', 'a')
-        t = datetime.now()
-        now = t.strftime("%y/%m/%d %H:%M:%S")
-        f.write( now + ';' + str(SN) + ';' + str(numTx) + ';' + str(numTxAck) + ';' + str(latency) + '\n' )
-        f.close()
+        #f = open(address + '.txt', 'a')
+        #t = datetime.now()
+        #now = t.strftime("%y/%m/%d %H:%M:%S")
+        #f.write( now + ';' + str(SN) + ';' + str(numTx) + ';' + str(numTxAck) + ';' + str(latency) + '\n' )
+        #f.close()
         
         
     

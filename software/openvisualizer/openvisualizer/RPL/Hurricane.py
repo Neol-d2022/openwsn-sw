@@ -53,9 +53,9 @@ class Hurricane(eventBusClient.eventBusClient):
         #print data[1]
         #print data[2]
         
-        f = open('topology.bin', 'ab')
-        newFileByteArray = bytearray( data[0] )
-        f.write( newFileByteArray )
-        f.close()
+        #f = open('topology.bin', 'ab')
+        #newFileByteArray = bytearray( data[0] )
+        #f.write( newFileByteArray )
+        #f.close()
         
     
