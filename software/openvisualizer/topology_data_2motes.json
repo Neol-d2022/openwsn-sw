@@ -4,7 +4,7 @@
         {
             "fromMote": 1,
             "toMote": 2,
-            "pdr": 0.5593
+            "pdr": 1.0
         }
     ],
     "DAGrootList": [],
