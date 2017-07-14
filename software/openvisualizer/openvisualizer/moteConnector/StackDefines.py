@@ -1,6 +1,6 @@
 # DO NOT EDIT DIRECTLY!
 # This file was generated automatically by GenStackDefines.py
-# on Thu, 08 Jun 2017 13:56:41
+# on Sat, 15 Jul 2017 02:19:30
 #
 
 components = {
@@ -47,6 +47,13 @@ components = {
   40: "USERIALBRIDGE",
   41: "UEXPIRATION",
   42: "UMONITOR",
+ 160: "USHORTID",
+ 161: "UHURRICANE",
+ 162: "UANTILOOP",
+ 163: "UPROBER",
+ 164: "URANKER",
+ 165: "URANKER_RES",
+ 166: "USHORTID_RES",
 }
 
 errorDescriptions = {
