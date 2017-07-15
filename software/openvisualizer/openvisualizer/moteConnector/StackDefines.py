@@ -1,6 +1,6 @@
 # DO NOT EDIT DIRECTLY!
 # This file was generated automatically by GenStackDefines.py
-# on Sat, 15 Jul 2017 02:19:30
+# on Sat, 15 Jul 2017 17:06:21
 #
 
 components = {
@@ -47,6 +47,8 @@ components = {
   40: "USERIALBRIDGE",
   41: "UEXPIRATION",
   42: "UMONITOR",
+  43: "CJOIN",
+  44: "OPENOSCOAP",
  160: "USHORTID",
  161: "UHURRICANE",
  162: "UANTILOOP",
@@ -124,6 +126,12 @@ errorDescriptions = {
   65: "the metadata type is not suppored",
   66: "the received packet has expired",
   67: "packet expiry time reached, dropped",
+  68: "node joined",
+  69: "OSCOAP sequence number reached maximum value",
+  70: "OSCOAP buffer overflow detected {code location {0}}",
+  71: "OSCOAP replay protection failed",
+  72: "OSCOAP decryption and tag verification failed",
+  73: "Aborted join process {code location {0}}",
 }
 
 sixtop_returncode = {
