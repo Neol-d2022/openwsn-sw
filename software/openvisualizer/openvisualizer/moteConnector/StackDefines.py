@@ -56,6 +56,7 @@ components = {
  164: "URANKER",
  165: "URANKER_RES",
  166: "USHORTID_RES",
+ 167: "UTYPHOON",
 }
 
 errorDescriptions = {
